@@ -120,3 +120,85 @@ function sat(r1, r2)
     r1.y = r1.y - overlap * d.y / s
     return true
 end
+
+function direction(a, b, c)
+    v = (b.y-a.y)*(c.x-b.x)-(b.x-a.x)*(c.y-b.y)
+    if v == 0 then
+        return 0
+    elseif v < 0 then
+        return 2
+    else
+        return 1
+    end
+end
+
+function isOnLine(p1, p2, p3)
+    if p3.x <= math.max(p1.x, p2.x)
+    and p3.x >= math.min(p1.x, p2.x)
+    and p3.y <= math.max(p1.y, p2.y)
+    and p3.y >= math.min(p1.y, p2.y) 
+    then
+        return true
+    else
+        return false
+    end
+end
+
+function lineIntersection(p1, p2, p3, p4)
+    local d1 = direction(p1, p2, p3)
+    local d2 = direction(p1, p2, p4)
+    local d3 = direction(p3, p4, p1)
+    local d4 = direction(p3, p4, p2)
+    if (not (d1 == d2)) and (not (d3 == d4)) then
+        return true
+    end
+    if d1 == 0 and isOnLine(p1, p2, p3) then
+        return true
+    end
+    if d2 == 0 and isOnLine(p1, p2, p4) then
+        return true
+    end
+    if d3 == 0 and isOnLine(p3, p4, p1) then
+        return true
+    end
+    if d4 == 0 and isOnLine(p3, p4, p2) then
+        return true
+    end
+    return false
+end
+
+function pointPolygonIntersection(polygon, point)
+    local n = table.getn(polygon.vertices)/2
+    local e1 = point
+    local e2 = {x = 10000, y = point.y}
+    local count = 0
+    local i = 1
+    local h = 2
+    repeat
+        s1 = {x = polygon.vertices[i*2-1], y = polygon.vertices[i*2]}
+        h = i + 1
+        if h > n then
+            h = 1
+        end
+        s2 = {x = polygon.vertices[h*2-1], y = polygon.vertices[h*2]}
+
+        if lineIntersection(e1, e2, s1, s2) then
+            if direction(s1, point, s2) == 0 then
+                print("sth")
+                return isOnLine(s1, s2, point)
+            end
+            count = count + 1
+        end
+
+        i = i + 1
+        if i > n then
+            i = 1
+        end
+    until i == 1
+
+    if count%2 == 1 then
+        return true
+    else
+        return false
+    end
+end
