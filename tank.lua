@@ -29,7 +29,10 @@ function newTank(color, px, py)
         turret = newPolygon({-15, -20, 15, -20, 15, 20, -15, 20}, px, py),
         cannon = newPolygon({-5, -20, 5, -20, 5, -70, -5, -70}, px, py),
         velocity = 0,
-        update = function(self, dt)
+        projectiles = {},
+        pt = 0.0,
+        hp = 10,
+        update = function(self, dt, another)
             if love.keyboard.isDown(self.keyset[1]) then
                 self.velocity = self.velocity + ACC*dt
             end
@@ -43,7 +46,11 @@ function newTank(color, px, py)
                 self.angle = self.angle + TRT*dt
             end
             if love.keyboard.isDown(self.keyset[5]) then
-                
+                if self.pt > 2 then
+                    table.insert(self.projectiles, 
+                    newProjectile(self.x + math.sin(self.turretAngle)*70, self.y - math.cos(self.turretAngle)*70, self.turretAngle))
+                    self.pt = 0.0
+                end
             end
             if love.keyboard.isDown(self.keyset[6]) then
                 self.turretAngle = self.turretAngle - TRT*dt
@@ -69,12 +76,31 @@ function newTank(color, px, py)
             self.cannon.y = self.y
             self.cannon.angle = self.turretAngle
             self.cannon:refresh()
+
+            for i, v in pairs(self.projectiles) do
+                v:move(dt)
+                if v:check(another) then
+                    table.remove(self.projectiles, i)
+                    another.hp = another.hp - 1
+                end
+            end
+
+            self.pt = self.pt + dt
         end,
         draw = function(self)
+            if self.hp == 0 then
+                love.event.quit()
+                return 'dead'
+            end
             love.graphics.setColor(self.red, self.green, 1, 1)
             self.hull:draw()
             self.turret:draw()
             self.cannon:draw()
+            for i, v in pairs(self.projectiles) do
+                v:draw()
+            end
+            love.graphics.rectangle("line", self.x - 60, self.y + 50, 100, 5)
+            love.graphics.rectangle("fill", self.x - 60, self.y + 50, 10*self.hp, 5)
         end
     }
 end

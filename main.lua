@@ -1,5 +1,6 @@
---TANKING 0.1
+--TANKING 1.0
 require "lib"
+require "projectile"
 require "tank"
 
 function love.load()
@@ -8,14 +9,14 @@ function love.load()
 end
 
 function love.update(dt)
-    blue:update(dt)
+    blue:update(dt, red)
     if sat(blue.hull, red.hull) then
         blue.velocity = blue.velocity - blue.velocity*0.5*dt
     end
     blue.x = blue.hull.x
     blue.y = blue.hull.y
 
-    red:update(dt)
+    red:update(dt, blue)
     if sat(red.hull, blue.hull) then
         red.velocity = red.velocity - red.velocity*0.5*dt
     end
